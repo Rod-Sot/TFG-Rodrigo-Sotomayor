@@ -1,0 +1,100 @@
+body {
+      background-image: url('images/fondo.jpg');
+      background-repeat: no-repeat;
+      background-size: auto;
+      background-attachment: fixed;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    main {
+      flex: 1;
+    }
+    #sidebarMenu { width: 240px !important; }
+    .main-container {
+      padding: 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+    }
+    #noticias-scroll {
+      max-height: 65vh;
+      overflow-y: auto;
+      background: rgba(255,255,255,0.95);
+      border-radius: 10px;
+      padding: 1rem;
+    }
+    .filtros-noticias {
+      background: #f8f9fa;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.07);
+    }
+    .news-card {
+      display: flex;
+      background-color: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: transform 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .news-card:hover {
+      transform: scale(1.01);
+      background-color: #f1f1f1;
+    }
+    .news-thumbnail {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 1rem;
+    }
+    .news-info { 
+        flex-grow: 1; 
+    }
+    .news-title { 
+        font-weight: bold; 
+        font-size: 1.2rem; 
+        margin-bottom: 0.3rem; 
+    }
+    .news-date { 
+        font-size: 0.9rem; 
+        color: #666; 
+    }
+    .news-summary { 
+        margin-top: 0.5rem; 
+        font-size: 0.95rem; 
+    }
+    .logo-mini { 
+        width: 40px; 
+        height: auto; 
+    }
+    #noticias-scroll::-webkit-scrollbar { 
+        width: 8px; 
+    }
+    #noticias-scroll::-webkit-scrollbar-thumb { 
+        background: #ccc; 
+        border-radius: 4px; 
+    }
+    #login-btn {
+        background-color: #fff !important;
+        color: #0d6efd !important; /* Azul Bootstrap */
+        border-color: #0d6efd !important;
+        transition: background 0.2s, color 0.2s;
+    }
+    #login-btn:hover, #login-btn:focus {
+    background-color: #0d6efd !important;
+    color: #fff !important;
+    border-color: #0d6efd !important;
+    }
+    .btn.active, .btn[aria-disabled="true"] {
+      background-color: #0d6efd;
+      color: #fff;
+      pointer-events: none;
+      border-color: #0d6efd !important;
+    }

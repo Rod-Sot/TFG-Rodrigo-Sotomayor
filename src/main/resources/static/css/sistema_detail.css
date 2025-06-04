@@ -1,0 +1,58 @@
+body {
+      background-image: url('images/fondo.png');
+      background-repeat: repeat;
+      background-attachment: fixed;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    main {
+      flex: 1;
+    }
+    #sidebarMenu {
+      width: 240px !important;
+    }
+    .sistema-header {
+      background-color: rgba(255,255,255,0.95);
+      border-radius: 1rem;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    .sistema-description {
+      white-space: pre-line;
+    }
+    .btn-follow {
+      float: right;
+    }
+    .related-section {
+      background-color: rgba(255,255,255,0.95);
+      border-radius: 1rem;
+      padding: 1rem 2rem;
+      margin-top: 2rem;
+    }
+    .documento-item, .noticia-item {
+      padding: 0.5rem;
+      border-bottom: 1px solid #ddd;
+    }
+    .logo-mini {
+      width: 40px;
+      height: auto;
+    }
+    #login-btn {
+      background-color: #fff !important;
+      color: #0d6efd !important;
+      border-color: #0d6efd !important;
+      transition: background 0.2s, color 0.2s;
+    }
+    #login-btn:hover, #login-btn:focus {
+      background-color: #0d6efd !important;
+      color: #fff !important;
+      border-color: #0d6efd !important;
+    }
+    .btn.active, .btn[aria-disabled="true"] {
+      background-color: #0d6efd;
+      color: #fff;
+      pointer-events: none;
+      border-color: #0d6efd !important;
+    }

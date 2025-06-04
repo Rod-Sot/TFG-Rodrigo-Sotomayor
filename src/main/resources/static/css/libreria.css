@@ -1,0 +1,91 @@
+body {
+      background-image: url('images/fondo.jpg');
+      background-repeat: no-repeat;
+      background-size: auto;
+      background-attachment: fixed;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    main { flex: 1; }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        background-color: rgba(255, 255, 255, 0.8); 
+        border-radius: 50%;
+        padding: 1.2rem;
+        transition: all 0.3s ease;
+        filter: drop-shadow(0 0 2px #000);
+    }
+    .carousel-control-prev-icon:hover,
+    .carousel-control-next-icon:hover {
+        background-color: #ffffff;
+        filter: drop-shadow(0 0 6px #000);
+        transform: scale(1.1);
+    }
+    #sidebarMenu { width: 240px !important; }
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      text-decoration: none;
+    }
+    .carousel-item img {
+      object-fit: cover;
+      height: 350px;
+    }
+    .sistema-info {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      border-radius: 1rem;
+    }
+    .sistema-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+    .sistema-card:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    }
+    .circle-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        background-color: #ccc;
+        border-radius: 50%;
+    }
+    .active-number {
+        background-color: #333;
+        color: white;
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        border-radius: 50%;
+        line-height: 30px;
+        display: inline-block;
+    }
+    .logo-mini { width: 40px; height: auto; }
+    .sistema-title { font-size: 1.5rem; font-weight: bold; }
+    .carousel-caption {
+      background-color: rgba(0, 0, 0, 0.6);
+      border-radius: 0.5rem;
+    }
+    #login-btn {
+      background-color: #fff !important;
+      color: #0d6efd !important;
+      border-color: #0d6efd !important;
+      transition: background 0.2s, color 0.2s;
+    }
+    #login-btn:hover, #login-btn:focus {
+      background-color: #0d6efd !important;
+      color: #fff !important;
+      border-color: #0d6efd !important;
+    }
+    .btn.active, .btn[aria-disabled="true"] {
+      background-color: #0d6efd;
+      color: #fff;
+      pointer-events: none;
+      border-color: #0d6efd !important;
+    }

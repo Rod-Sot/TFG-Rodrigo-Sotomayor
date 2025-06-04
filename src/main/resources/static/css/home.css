@@ -1,0 +1,89 @@
+body {
+        background-image: url('images/fondo.jpg'); 
+        background-size: cover;
+        background-position: center;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+    main {
+        flex-grow: 1;
+    }
+    .logo {
+            width: 17vw;
+            height: auto;
+    }
+    .card {
+        border-radius: 1rem;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.42);
+        background-color: rgb(255, 255, 255);
+    }
+    .main-card {
+        background-color:rgb(179, 0, 0);
+        color: white;
+    }
+    #sidebarMenu {
+      width: 240px !important;
+    }
+    #sidebarMenu .nav-link {
+      text-align: left !important;
+    }
+    .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      text-decoration: none;
+    }
+    .news-card {
+      display: flex;
+      background-color: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: transform 0.2s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .news-card:hover {
+      transform: scale(1.01);
+      background-color: #f1f1f1;
+    }
+    .news-thumbnail {
+      width: 120px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-right: 1rem;
+    }
+    .news-info {
+      flex-grow: 1;
+    }
+    .news-title {
+      font-weight: bold;
+      font-size: 1.2rem;
+      margin-bottom: 0.3rem;
+    }
+    .news-date {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    .news-summary {
+      margin-top: 0.5rem;
+      font-size: 0.95rem;
+    }
+    #login-btn {
+    background-color: #fff !important;
+    color: #0d6efd !important; /* Azul Bootstrap */
+    border-color: #0d6efd !important;
+    transition: background 0.2s, color 0.2s;
+    }
+    #login-btn:hover, #login-btn:focus {
+    background-color: #0d6efd !important;
+    color: #fff !important;
+    border-color: #0d6efd !important;
+    }
+    .btn.active, .btn[aria-disabled="true"] {
+      background-color: #0d6efd;
+      color: #fff;
+      pointer-events: none;
+      border-color: #0d6efd !important;
+    }

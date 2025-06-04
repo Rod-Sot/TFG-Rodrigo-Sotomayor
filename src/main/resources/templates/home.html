@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Rollenia - Home</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/home.css">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script src="/js/home.js" defer></script>
+</head>
+<body>
+
+  <!-- Menú lateral, se copiará en todas las vistas 
+   y se adapta cual es el botón resaltado en función 
+   de la vista en la que se encuentre -->
+  <nav class="offcanvas offcanvas-start bg-dark" tabindex="-1" id="sidebarMenu">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title text-white">Menú</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+      <ul class="nav flex-column text-start">
+        <li class="nav-item">
+          <a class="btn btn-outline-light w-100 text-start mb-2" tabindex="-1" aria-disabled="true">Inicio</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light w-100 text-start mb-2" href="/noticias">Noticias</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light w-100 text-start mb-2" href="/foro">Foro</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light w-100 text-start mb-2" href="/partidas">Partidas</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light w-100 text-start mb-2" href="/libreria">Librería</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light w-100 text-start mb-2" href="/perfil_user" id="perfil-btn">Perfil</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-light w-100 text-start mb-2" href="/login" id="login-btn">Iniciar sesión</a>
+          <button class="btn btn-danger w-100 text-start mb-2" id="logout-btn" style="display:none;">Cerrar sesión</button>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Botón para el menú lateral -->
+  <header class="bg-dark text-white py-2 px-3 d-flex justify-content-between align-items-center">
+    <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+      ☰
+    </button>
+  </header>
+
+  <!-- Logo, centrado en la página -->
+  <div class="text-center my-4">
+    <img src="css/images/logo.svg" alt="Rollenia Logo" class="logo" />
+  </div>
+
+  <!-- Contenedor central -->
+  <main class="container my-5">
+    <div class="row g-4">
+
+      <!-- Tarjeta principal -->
+      <div class="col-12">
+        <div class="card main-card p-4">
+          <h2 class="card-title">¡Bienvenido a Rollenia!</h2>
+          <p class="card-text">Sumérgete en el mejor lugar para compartir tus aventuras de rol, encontrar partidas, debatir en el foro y mucho más.</p>
+        </div>
+      </div>
+
+      <!-- Tarjetas pequeñas -->
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">Últimas noticias</h5>
+          <p class="card-text">Descubre los últimos anuncios y novedades de la comunidad.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">Explora el foro</h5>
+          <p class="card-text">Comparte tus ideas, teorías, dudas y anécdotas de juego.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card p-3">
+          <h5 class="card-title">Busca partidas</h5>
+          <p class="card-text">Únete a partidas activas o crea la tuya y encuentra jugadores afines.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer, se copia igual en todas las vista -->
+  <footer class="bg-dark text-light text-center py-3 mt-5">
+    <div class="container">
+      <p class="mb-0">&copy; 2025 Rollenia. Todos los derechos reservados.</p>
+    </div>
+  </footer>
+</body>
+</html>
+
+
+
