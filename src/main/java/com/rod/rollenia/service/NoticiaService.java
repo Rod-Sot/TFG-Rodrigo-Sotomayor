@@ -41,6 +41,10 @@ public class NoticiaService {
         return noticiaRepository.findAll();
     }
 
+    public List<Noticia> listarTodasNoticias() {
+        return noticiaRepository.findAll();
+    }
+
     public Noticia actualizarNoticia(Long id, Noticia noticiaActualizada) {
         return noticiaRepository.findById(id).map(noticia -> {
             noticia.setTitulo(noticiaActualizada.getTitulo());

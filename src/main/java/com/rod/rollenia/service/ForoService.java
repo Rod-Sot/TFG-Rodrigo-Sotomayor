@@ -48,4 +48,10 @@ public class ForoService {
     public void eliminarForo(Long id) {
         foroRepository.deleteById(id);
     }
+
+    public void sumarVisita(Long foroId) {
+        Foro foro = foroRepository.findById(foroId).orElseThrow();
+        foro.setVisitas(foro.getVisitas() + 1);
+        foroRepository.save(foro);
+    }
 }

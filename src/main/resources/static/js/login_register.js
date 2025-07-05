@@ -25,7 +25,9 @@ function toggleSlide() {
             window.location.href = "/perfil_user";
           });
         } else {
-          return res.text().then(msg => { throw new Error(msg); });
+          res.text().then(msg => {
+            alert(msg); 
+          });
         }
       })
       .catch(err => {
@@ -45,12 +47,17 @@ function toggleSlide() {
       })
       .then(res => {
         if (res.ok) {
+          // Extrae el token del header Authorization
+          const token = res.headers.get('Authorization')?.replace('Bearer ', '');
+          if (token) localStorage.setItem('token', token);
           res.json().then(usuario => {
             localStorage.setItem('usuario', JSON.stringify(usuario));
             window.location.href = "/perfil_user";
           });
         } else {
-          return res.text().then(msg => { throw new Error(msg); });
+          res.text().then(msg => {
+            alert(msg); 
+          });
         }
       })
       .catch(err => {

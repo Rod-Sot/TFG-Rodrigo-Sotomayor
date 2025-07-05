@@ -39,6 +39,9 @@
           <a class="btn btn-outline-light w-100 text-start mb-2" href="/login" id="login-btn">Iniciar sesión</a>
           <button class="btn btn-danger w-100 text-start mb-2" id="logout-btn" style="display:none;">Cerrar sesión</button>
         </li>
+        <li class="nav-item" id="admin-btn-li" style="display:none;">
+          <a class="btn btn-outline-warning w-100 text-start mb-2" href="/admin.html" id="admin-btn">Panel Admin</a>
+        </li>
       </ul>
     </div>
   </nav>
@@ -93,10 +96,6 @@
               <select class="form-select" id="sistemaNoticia" required>
                 <option value="">Selecciona sistema</option>
               </select>
-            </div>
-            <div class="mb-2">
-              <label class="form-label">Fecha de publicación</label>
-              <input type="date" class="form-control" id="fechaNoticia" required>
             </div>
             <div class="mb-2">
               <label class="form-label">Contenido</label>

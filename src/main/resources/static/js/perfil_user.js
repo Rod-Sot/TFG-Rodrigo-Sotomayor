@@ -143,4 +143,11 @@ document.addEventListener("DOMContentLoaded", function() {
       actualizarPerfil(usuario.avatarUrl || '');
     }
   });
+  const adminBtnLi = document.getElementById('admin-btn-li');
+
+  if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
+    adminBtnLi.style.display = "block";
+  } else {
+    adminBtnLi.style.display = "none";
+  }
 });

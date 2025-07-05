@@ -92,4 +92,43 @@ public class SistemaJuegoController {
         public Long getUsuarioId() { return usuarioId; }
         public void setUsuarioId(Long usuarioId) { this.usuarioId = usuarioId; }
     }
+
+    // Endpoints para el panel de administración
+    @GetMapping("/admin/sistemas")
+    public List<SistemaJuego> listarSistemasAdmin() {
+        return sistemaJuegoService.listarSistemasJuego();
+    }
+
+    @PostMapping("/admin/sistemas")
+    public ResponseEntity<SistemaJuego> crearSistemaAdmin(@RequestBody SistemaJuego sistemaJuego) {
+        SistemaJuego nuevoSistema = sistemaJuegoService.crearSistemaJuego(sistemaJuego);
+        return new ResponseEntity<>(nuevoSistema, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/admin/sistemas/{id}")
+    public ResponseEntity<SistemaJuego> obtenerSistemaAdmin(@PathVariable Long id) {
+        Optional<SistemaJuego> sistemaJuego = sistemaJuegoService.obtenerSistemaJuegoPorId(id);
+        return sistemaJuego.map(ResponseEntity::ok)
+                           .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/admin/sistemas/{id}")
+    public ResponseEntity<SistemaJuego> actualizarSistemaAdmin(@PathVariable Long id, @RequestBody SistemaJuego sistemaJuegoActualizado) {
+        try {
+            SistemaJuego sistemaJuego = sistemaJuegoService.actualizarSistemaJuego(id, sistemaJuegoActualizado);
+            return ResponseEntity.ok(sistemaJuego);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/admin/sistemas/{id}")
+    public ResponseEntity<Void> eliminarSistemaAdmin(@PathVariable Long id) {
+        try {
+            sistemaJuegoService.eliminarSistemaJuego(id);
+            return ResponseEntity.noContent().build();
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

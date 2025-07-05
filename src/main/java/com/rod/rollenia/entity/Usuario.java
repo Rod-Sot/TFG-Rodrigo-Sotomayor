@@ -22,7 +22,8 @@ public class Usuario {
     private String password;
     private String avatarUrl;
     private LocalDate fechaRegistro;
-
+    private String rol; // valores: "USER", "USER_NEWS", "ADMIN", "OWNER"
+    private boolean baneado = false; // Indica si el usuario está baneado
     // Relaciones
     @OneToMany(mappedBy = "autor")
     @JsonIgnoreProperties("autor")
@@ -43,6 +44,19 @@ public class Usuario {
     @ManyToMany(mappedBy = "jugadores")
     @JsonIgnoreProperties("jugadores")
     private List<Partida> partidasComoJugador = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+        name = "usuario_amigos",
+        joinColumns = @JoinColumn(name = "usuario_id"),
+        inverseJoinColumns = @JoinColumn(name = "amigo_id")
+    )
+    @JsonIgnoreProperties("amigosConmigo")
+    private Set<Usuario> amigos = new HashSet<>();
+
+    @ManyToMany(mappedBy = "amigos")
+    @JsonIgnoreProperties("amigos")
+    private Set<Usuario> amigosConmigo = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -92,6 +106,14 @@ public class Usuario {
         this.fechaRegistro = fechaRegistro;
     }
 
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
     public List<Noticia> getNoticiasPublicadas() {
         return noticiasPublicadas;
     }
@@ -116,12 +138,35 @@ public class Usuario {
         this.sistemasSeguidos = sistemasSeguidos;
     }
 
+    public boolean getBaneado(){
+        return baneado;
+    }
+    public void setBaneado(boolean baneado) {
+        this.baneado = baneado;
+    }
+
     public List<Partida> getPartidasComoJugador() {
         return partidasComoJugador;
     }
 
     public void setPartidasComoJugador(List<Partida> partidasComoJugador) {
         this.partidasComoJugador = partidasComoJugador;
+    }
+
+    public Set<Usuario> getAmigos() {
+        return amigos;
+    }
+
+    public void setAmigos(Set<Usuario> amigos) {
+        this.amigos = amigos;
+    }
+
+    public Set<Usuario> getAmigosConmigo() {
+        return amigosConmigo;
+    }
+
+    public void setAmigosConmigo(Set<Usuario> amigosConmigo) {
+        this.amigosConmigo = amigosConmigo;
     }
 
     public Usuario() {

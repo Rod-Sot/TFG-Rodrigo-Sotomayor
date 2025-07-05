@@ -77,4 +77,21 @@ public class ForoController {
         foroService.eliminarForo(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/admin/foros")
+    public List<Foro> listarForosAdmin() {
+        return foroService.listarForos();
+    }
+
+    @DeleteMapping("/admin/foros/{id}")
+    public ResponseEntity<Void> eliminarForoAdmin(@PathVariable Long id) {
+        foroService.eliminarForo(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/sumar-visita")
+    public ResponseEntity<Void> sumarVisita(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        foroService.sumarVisita(id);
+        return ResponseEntity.ok().build();
+    }
 }

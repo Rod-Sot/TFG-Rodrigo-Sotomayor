@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const loginBtn = document.getElementById('login-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const perfilBtn = document.getElementById('perfil-btn');
+    const adminBtnLi = document.getElementById('admin-btn-li');
 
     if (usuario) {
       loginBtn.style.display = "none";
@@ -18,6 +19,12 @@ document.addEventListener("DOMContentLoaded", function() {
       localStorage.removeItem('usuario');
       window.location.href = "/home";
     });
+
+    if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
+      adminBtnLi.style.display = "block";
+    } else {
+      adminBtnLi.style.display = "none";
+    }
 
     cargarPartidas();
     // Cargar sistemas en el filtro y en el modal

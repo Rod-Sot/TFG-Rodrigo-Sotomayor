@@ -3,6 +3,14 @@
   let foroActual = null;
   const usuarioStr = localStorage.getItem('usuario');
   const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+  const adminBtnLi = document.getElementById('admin-btn-li');
+
+  if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
+    adminBtnLi.style.display = "block";
+  } else {
+    adminBtnLi.style.display = "none";
+  }
+
   function cargarForo() {
     if (!foroId) {
       document.getElementById("foro-header").innerHTML = "<h3>No se ha especificado el foro.</h3>";
@@ -12,6 +20,15 @@
       .then(res => res.ok ? res.json() : Promise.reject("No se pudo cargar el foro"))
       .then(foro => {
         foroActual = foro;
+
+        // Sumar visita si el usuario está logueado y no es el autor
+        if (usuario && foro.autor && usuario.id !== foro.autor.id) {
+          fetch(`/api/foros/${foroId}/sumar-visita`, {
+            method: 'PUT',
+            headers: { 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '') }
+          });
+        }
+
         document.getElementById("foro-header").innerHTML = `
           <h3 class="mb-2">${foro.titulo}</h3>
           <p>

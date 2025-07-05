@@ -4,6 +4,7 @@ package com.rod.rollenia.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.rod.rollenia.entity.Partida;
 import com.rod.rollenia.entity.Usuario;
@@ -89,5 +90,20 @@ public class PartidaController {
         partida.getJugadores().add(usuario);
         partidaService.guardar(partida);
         return ResponseEntity.ok().build();
+    }
+
+    // Listar todas las partidas (admin)
+    @GetMapping("/admin/partidas")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OWNER')")
+    public List<Partida> listarPartidasAdmin() {
+        return partidaService.listarPartidas();
+    }
+
+    // Eliminar partida (admin)
+    @DeleteMapping("/admin/partidas/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('OWNER')")
+    public ResponseEntity<Void> eliminarPartidaAdmin(@PathVariable Long id) {
+        partidaService.eliminarPartida(id);
+        return ResponseEntity.noContent().build();
     }
 }

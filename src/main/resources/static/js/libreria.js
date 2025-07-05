@@ -57,8 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
       prev.classList.toggle('d-none', activeIndex === 1);
       next.classList.toggle('d-none', activeIndex === totalItems);
     }
-
-    // Inicializa
     setTimeout(actualizarIndicador, 500);
     carousel.addEventListener('slid.bs.carousel', actualizarIndicador);
+    const usuarioStr = localStorage.getItem('usuario');
+    const usuarioObj = usuarioStr ? JSON.parse(usuarioStr) : null;
+    const adminBtnLi = document.getElementById('admin-btn-li');
+
+    if (usuarioObj && (usuarioObj.rol === "ADMIN" || usuarioObj.rol === "OWNER")) {
+      adminBtnLi.style.display = "block";
+    } else {
+      adminBtnLi.style.display = "none";
+    }
   });

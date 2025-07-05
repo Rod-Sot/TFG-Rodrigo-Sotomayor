@@ -200,3 +200,12 @@ let noticiaId = null;
   } else {
     document.getElementById("noticia-detalle").innerHTML = "<p>ID de noticia no especificado.</p>";
   }
+const usuarioStr = localStorage.getItem('usuario');
+const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
+const adminBtnLi = document.getElementById('admin-btn-li');
+
+if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
+  adminBtnLi.style.display = "block";
+} else {
+  adminBtnLi.style.display = "none";
+}

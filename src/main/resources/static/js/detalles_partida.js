@@ -102,6 +102,14 @@ document.addEventListener("DOMContentLoaded", function() {
         cont.innerHTML = `<div class='alert alert-danger'>${err}</div>`;
       });
   }
-
+  
   cargarDetallesPartida();
+  const usuarioStr = localStorage.getItem('usuario');
+  const adminBtnLi = document.getElementById('admin-btn-li');
+
+  if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
+    adminBtnLi.style.display = "block";
+  } else {
+    adminBtnLi.style.display = "none";
+  }
 });

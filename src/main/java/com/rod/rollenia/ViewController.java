@@ -79,5 +79,10 @@ public class ViewController {
     public String sistemaDetail() {
         return "sistema_detail";
     }
+
+    @GetMapping("/admin")
+    public String adminPanel() {
+        return "admin";
+    }
 }
 
