@@ -1,5 +1,7 @@
 package com.rod.rollenia.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 
 @Entity
@@ -21,7 +23,7 @@ public class Documento {
 
     @ManyToOne
     @JoinColumn(name = "sistema_id")
-    @com.fasterxml.jackson.annotation.JsonIgnoreProperties({"documentos", "noticiasRelacionadas", "seguidores", "partidas"})
+    @JsonIgnoreProperties({"documentos", "noticiasRelacionadas", "seguidores", "partidas"})
     private SistemaJuego sistema;
 
     public Documento() {}

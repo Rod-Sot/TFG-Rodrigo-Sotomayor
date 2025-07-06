@@ -32,13 +32,6 @@
         <li class="nav-item">
           <a class="btn btn-outline-light w-100 text-start mb-2" href="/libreria">Librería</a>
         </li>
-        <li class="nav-item">
-          <a class="btn btn-outline-light w-100 text-start mb-2" href="/perfil_user" id="perfil-btn">Perfil</a>
-        </li>
-        <li class="nav-item">
-          <a class="btn btn-outline-light w-100 text-start mb-2" href="/login" id="login-btn">Iniciar sesión</a>
-          <button class="btn btn-danger w-100 text-start mb-2" id="logout-btn" style="display:none;">Cerrar sesión</button>
-        </li>
         <li class="nav-item" id="admin-btn-li" style="display:none;">
           <a class="btn btn-outline-warning w-100 text-start mb-2" href="/admin.html" id="admin-btn">Panel Admin</a>
         </li>
@@ -47,12 +40,116 @@
   </nav>
   <!-- Barra superior -->
   <header class="bg-dark text-white py-2 px-3 d-flex justify-content-between align-items-center">
-    <div>
-      <button class="btn btn-outline-light me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">☰</button>
-      <a href="/" title="Volver al inicio"><img src="/css/images/logo.svg" alt="Inicio" class="logo-mini" /></a>
+    <button class="btn btn-outline-light" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+      ☰
+    </button>
+    <div class="flex-grow-1"></div>
+    <div class="d-flex align-items-center">
+      <div class="dropdown me-2" id="notificaciones-dropdown-container" style="display:none;">
+        <button class="btn btn-outline-light position-relative d-flex align-items-center" id="btn-notificaciones-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="me-1">🔔</span>
+          <span id="notificaciones-no-leidas-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"></span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 340px; max-height: 400px; overflow-y: auto;">
+          <input id="buscar-notificacion-input" type="text" class="form-control form-control-sm mb-2" placeholder="Buscar notificación...">
+          <ul id="notificaciones-list" class="list-group"></ul>
+          <button id="marcar-todas-leidas-btn" class="btn btn-link w-100 mt-2">Marcar todas como leídas</button>
+        </div>
+      </div>
+      <div class="dropdown me-2" id="mensajes-dropdown-container" style="display:none;">
+        <button class="btn btn-outline-light position-relative d-flex align-items-center" id="btn-mensajes-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <span class="me-1">📨</span> MSJ
+          <span id="mensajes-no-leidos-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none"></span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-end p-2" style="min-width: 320px; max-height: 400px; overflow-y: auto;">
+          <input id="buscar-conversacion-input" type="text" class="form-control form-control-sm mb-2" placeholder="Buscar conversación...">
+          <ul id="conversaciones-list" class="list-group"></ul>
+        </div>
+      </div>
+      <div id="user-dropdown-container" class="dropdown d-none">
+        <button class="btn btn-outline-light dropdown-toggle d-flex align-items-center" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <img id="userDropdownAvatar" src="/standard_pfp.png" alt="Avatar" class="rounded-circle me-2" style="width:32px;height:32px;object-fit:cover;">
+          <span id="userDropdownName">Usuario</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown" style="min-width: 250px;">
+          <li class="dropdown-header d-flex justify-content-between align-items-center">
+            <span>Amigos</span>
+            <span id="amigos-count" class="badge bg-primary ms-2"></span>
+          </li>
+          <li>
+            <input id="buscar-amigo-input" type="text" class="form-control form-control-sm mb-2" placeholder="Buscar amigo...">
+            <ul id="amigos-list" class="list-group list-group-flush mb-2" style="max-height: 200px; overflow-y: auto;"></ul>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button class="dropdown-item d-flex justify-content-between align-items-center position-relative" id="btn-solicitudes" data-bs-toggle="modal" data-bs-target="#modalSolicitudes">
+              Solicitudes de amistad
+              <span id="solicitudes-count" class="badge bg-danger ms-2"></span>
+            </button>
+          </li>
+          <li>
+            <a class="dropdown-item" href="/perfil_user">Mi perfil</a>
+          </li>
+          <li>
+            <button class="dropdown-item text-danger" id="dropdown-logout-btn">Cerrar sesión</button>
+          </li>
+          <li>
+            <button class="dropdown-item" id="btn-buscar-usuarios" data-bs-toggle="modal" data-bs-target="#modalBuscarUsuarios">
+              Buscar usuarios / Enviar solicitud
+            </button>
+          </li>
+        </ul>
+      </div>
+      <button id="login-btn-top" class="btn btn-success ms-2 d-none">Iniciar sesión</button>
     </div>
-    <h5 class="mb-0">Noticia</h5>
-    <div></div>
+
+    <!-- Modal de solicitudes de amistad -->
+    <div class="modal fade" id="modalSolicitudes" tabindex="-1" aria-labelledby="modalSolicitudesLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalSolicitudesLabel">Solicitudes de amistad</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <ul id="solicitudes-list" class="list-group"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal para buscar usuarios y enviar solicitud -->
+    <div class="modal fade" id="modalBuscarUsuarios" tabindex="-1" aria-labelledby="modalBuscarUsuariosLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalBuscarUsuariosLabel">Buscar usuarios</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input id="input-buscar-usuario" type="text" class="form-control mb-2" placeholder="Nombre de usuario...">
+            <ul id="usuarios-busqueda-list" class="list-group"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de mensajes -->
+    <div class="modal fade" id="modalMensajes" tabindex="-1" aria-labelledby="modalMensajesLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalMensajesLabel">Mensajes con <span id="nombre-amigo-chat"></span></h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body" id="mensajes-contenido" style="max-height: 400px; overflow-y: auto;"></div>
+          <div class="modal-footer">
+            <input id="input-mensaje" type="text" class="form-control" placeholder="Escribe un mensaje...">
+            <button id="btn-enviar-mensaje" class="btn btn-primary ms-2">Enviar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </header>
   <!-- Contenido principal -->
   <main class="container" id="noticia-detalle">

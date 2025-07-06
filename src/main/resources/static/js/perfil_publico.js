@@ -1,8 +1,6 @@
 document.addEventListener("DOMContentLoaded", function() {
   const usuarioStr = localStorage.getItem('usuario');
-  let usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
-  let amigosIds = [];
-  let solicitudesPendientesIds = [];
+  const usuario = usuarioStr ? JSON.parse(usuarioStr) : null;
   const adminBtnLi = document.getElementById('admin-btn-li');
   const userDropdownContainer = document.getElementById('user-dropdown-container');
   const userDropdownName = document.getElementById('userDropdownName');
@@ -23,13 +21,15 @@ document.addEventListener("DOMContentLoaded", function() {
   const buscarNotificacionInput = document.getElementById('buscar-notificacion-input');
   const notificacionesNoLeidasBadge = document.getElementById('notificaciones-no-leidas-badge');
   const marcarTodasLeidasBtn = document.getElementById('marcar-todas-leidas-btn');
+  let amigosIds = [];
+  let solicitudesPendientesIds = [];
 
   if (usuario) {
     if (userDropdownContainer) userDropdownContainer.classList.remove('d-none');
     if (userDropdownName) userDropdownName.textContent = usuario.nombreUsuario;
     if (loginBtnTop) loginBtnTop.classList.add('d-none');
     if (document.getElementById('userDropdownAvatar')) {
-      document.getElementById('userDropdownAvatar').src = usuario.avatarUrl || 'standard_pfp.png';
+      document.getElementById('userDropdownAvatar').src = usuario.avatarUrl || '/standard_pfp.png';
     }
 
     let amigosData = [];
@@ -136,71 +136,7 @@ document.addEventListener("DOMContentLoaded", function() {
     if (adminBtnLi) adminBtnLi.style.display = "none";
   }
 
-  const inputBuscarUsuario = document.getElementById('input-buscar-usuario');
-  const usuariosBusquedaList = document.getElementById('usuarios-busqueda-list');
-  if (document.getElementById('btn-buscar-usuarios')) {
-    document.getElementById('btn-buscar-usuarios').addEventListener('click', function() {
-      fetch(`/api/usuarios/${usuario.id}/amigos`)
-        .then(res => res.ok ? res.json() : [])
-        .then(amigos => {
-          amigosIds = amigos.map(a => a.id);
-          fetch(`/api/solicitudes-amistad/pendientes/enviadas/${usuario.id}`)
-            .then(res => res.ok ? res.json() : [])
-            .then(solicitudes => {
-              solicitudesPendientesIds = solicitudes.map(s => s.usuarioReceptor.id);
-            });
-        });
-    });
-  }
-  if (inputBuscarUsuario) {
-    inputBuscarUsuario.addEventListener('input', function() {
-      const query = inputBuscarUsuario.value.trim();
-      if (query.length < 2) {
-        usuariosBusquedaList.innerHTML = "";
-        return;
-      }
-      fetch(`/api/solicitudes-amistad/pendientes/enviadas/${usuario.id}`)
-        .then(res => res.ok ? res.json() : [])
-        .then(solicitudes => {
-          solicitudesPendientesIds = solicitudes.map(s => s.usuarioReceptor.id);
-          fetch(`/api/usuarios/buscar?nombre=${encodeURIComponent(query)}&idSolicitante=${usuario.id}`)
-            .then(res => res.ok ? res.json() : [])
-            .then(usuarios => {
-              usuariosBusquedaList.innerHTML = usuarios
-                .map(u =>
-                  `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <a href="/perfil_publico?id=${u.id}" class="text-decoration-none">${u.nombreUsuario}</a>
-                    ${
-                      amigosIds.includes(u.id)
-                        ? '<span class="badge bg-secondary ms-2">Ya es tu amigo</span>'
-                        : solicitudesPendientesIds.includes(u.id)
-                          ? '<span class="badge bg-warning text-dark ms-2">Ya solicitada</span>'
-                          : `<button class="btn btn-primary btn-sm ms-2" onclick="enviarSolicitud(${u.id})">Solicitar amistad</button>`
-                    }
-                  </li>`
-                ).join('');
-            });
-        });
-    });
-  }
-
-  window.enviarSolicitud = function(id) {
-    fetch(`/api/solicitudes-amistad/enviar?emisorId=${usuario.id}&receptorId=${id}`, {method: 'POST'})
-      .then(res => {
-        if (res.ok) {
-          alert('Solicitud enviada');
-          fetch(`/api/solicitudes-amistad/pendientes/enviadas/${usuario.id}`)
-            .then(res => res.ok ? res.json() : [])
-            .then(solicitudes => {
-              solicitudesPendientesIds = solicitudes.map(s => s.usuarioReceptor.id);
-              inputBuscarUsuario.dispatchEvent(new Event('input'));
-            });
-        } else {
-          alert('No se pudo enviar la solicitud');
-        }
-      });
-  };
-
+  // --- MENSAJES ---
   if (usuario && mensajesDropdownContainer) {
     mensajesDropdownContainer.style.display = '';
     let conversacionesData = [];
@@ -369,211 +305,127 @@ document.addEventListener("DOMContentLoaded", function() {
     };
   }
 
-  if (document.getElementById('logout-btn')) {
-    document.getElementById('logout-btn').addEventListener('click', function(e) {
-      e.preventDefault();
-      localStorage.removeItem('usuario');
-      window.location.href = "/home";
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get("id");
+  if (!userId) return;
+
+  if (usuarioStr) {
+    const usuarioLogueado = JSON.parse(usuarioStr);
+    if (usuarioLogueado.id == userId) {
+      window.location.href = "/perfil_user";
+      return;
+    }
+  }
+
+  fetch(`/api/usuarios/${userId}/perfil-publico`)
+    .then(res => res.json())
+    .then(usuario => {
+      document.getElementById('profile-avatar').src = usuario.avatarUrl || '/standard_pfp.png';
+      document.getElementById('nombre-usuario').textContent = usuario.nombreUsuario;
+      document.getElementById('biografia-usuario').textContent = usuario.biografia || '';
+      document.getElementById('fecha-registro').textContent = "Miembro desde: " + (usuario.fechaRegistro || '');
+
+      mostrarEstadoAmistad(userId);
+      cargarPartidasJugador(userId);
+      cargarPartidasDirector(userId);
+      cargarSistemasSeguidos(userId);
     });
+
+  function mostrarEstadoAmistad(perfilId) {
+    const usuarioStr = localStorage.getItem('usuario');
+    if (!usuarioStr) return;
+    const usuarioLogueado = JSON.parse(usuarioStr);
+    if (usuarioLogueado.id == perfilId) return;
+
+    fetch(`/api/solicitudes-amistad/estado?usuarioId=${usuarioLogueado.id}&otroId=${perfilId}`)
+      .then(res => res.text())
+      .then(estado => {
+        const contenedor = document.getElementById('amistad-actions');
+        contenedor.innerHTML = '';
+        if (estado === 'ninguna') {
+          contenedor.innerHTML = `<button id="btn-solicitar-amistad" class="btn btn-primary btn-sm">Solicitar amistad</button>`;
+          document.getElementById('btn-solicitar-amistad').onclick = function() {
+            fetch(`/api/solicitudes-amistad/enviar?emisorId=${usuarioLogueado.id}&receptorId=${perfilId}`, {method: 'POST'})
+              .then(res => res.ok ? location.reload() : alert('Error al enviar solicitud'));
+          };
+        } else if (estado === 'pendiente_enviada') {
+          contenedor.innerHTML = `<span class="text-warning">Solicitud pendiente</span>`;
+        } else if (estado === 'pendiente_recibida') {
+          fetch(`/api/solicitudes-amistad/pendientes/recibidas/${usuarioLogueado.id}`)
+            .then(res => res.json())
+            .then(solicitudes => {
+              const solicitud = solicitudes.find(s => s.usuarioEmisor.id == perfilId);
+              if (!solicitud) return;
+              contenedor.innerHTML = `
+                <button id="btn-aceptar" class="btn btn-success btn-sm me-2">Aceptar</button>
+                <button id="btn-rechazar" class="btn btn-danger btn-sm">Rechazar</button>
+              `;
+              document.getElementById('btn-aceptar').onclick = function() {
+                fetch(`/api/solicitudes-amistad/${solicitud.id}/aceptar`, {method: 'POST'})
+                  .then(res => res.ok ? location.reload() : alert('Error al aceptar solicitud'));
+              };
+              document.getElementById('btn-rechazar').onclick = function() {
+                fetch(`/api/solicitudes-amistad/${solicitud.id}/rechazar`, {method: 'POST'})
+                  .then(res => res.ok ? location.reload() : alert('Error al rechazar solicitud'));
+              };
+            });
+        } else if (estado === 'amigos') {
+          contenedor.innerHTML = `<span class="text-success">Ya sois amigos</span>`;
+        }
+      });
   }
 
-  if (!usuarioStr) {
-    window.location.href = "/login";
-    return;
-  }
-  try {
-    usuario = JSON.parse(usuarioStr);
-  } catch {
-    window.location.href = "/login";
-    return;
-  }
-
-  if (usuario.id) {
-    fetch(`/api/usuarios/${usuario.id}`)
-      .then(res => res.ok ? res.json() : usuario) 
-      .then(datos => {
-        usuario = datos;
-        cargarPerfil(usuario);
-      })
-      .catch(() => cargarPerfil(usuario));
-  } else {
-    cargarPerfil(usuario);
+  function cargarPartidasJugador(userId) {
+    fetch(`/api/usuarios/${userId}/partidas/jugador`)
+      .then(res => res.ok ? res.json() : [])
+      .then(partidas => {
+        const ul = document.getElementById('partidas-jugador');
+        if (!ul) return;
+        if (!partidas.length) {
+          ul.innerHTML = "<li class='list-group-item text-muted'>No hay partidas como jugador.</li>";
+        } else {
+          ul.innerHTML = partidas.map(p =>
+            `<li class="list-group-item d-flex justify-content-between align-items-center">
+              <a href="/partida_detail?partidaId=${p.id}" class="text-decoration-none">${p.titulo}</a>
+              <span class="badge bg-secondary">${p.sistemaJuego?.nombre || ''}</span>
+            </li>`
+          ).join('');
+        }
+      });
   }
 
-  function cargarPerfil(usuario) {
-    document.getElementById('nombre-usuario').textContent = usuario.nombreUsuario || 'Usuario';
-    document.getElementById('email-usuario').textContent = 'Email: ' + (usuario.email || '');
-    document.getElementById('profile-avatar').src = usuario.avatarUrl || 'standard_pfp.png';
-    document.getElementById('biografia-usuario').textContent = usuario.biografia || 'Escribe aquí tu biografía...';
-    if (usuario.id) {
-      // Partidas como jugador
-      fetch(`/api/usuarios/${usuario.id}/partidas/jugador`)
-        .then(res => res.ok ? res.json() : [])
-        .then(partidas => {
-          const ul = document.getElementById('partidas-jugador');
-          if (partidas.length === 0) {
-            ul.innerHTML = "<li class='list-group-item text-muted'>No hay partidas como jugador.</li>";
-          } else {
-            ul.innerHTML = partidas.map(p =>
-              `<li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="/partida_detail?partidaId=${p.id}" class="text-decoration-none">${p.titulo}</a>
-                <span class="badge bg-secondary">${p.sistemaJuego.nombre || ''}</span>
-              </li>`
-            ).join('');
-          }
-        });
-
-      // Partidas como director
-      fetch(`/api/usuarios/${usuario.id}/partidas/director`)
-        .then(res => res.ok ? res.json() : [])
-        .then(partidas => {
-          const ul = document.getElementById('partidas-director');
-          if (partidas.length === 0) {
-            ul.innerHTML = "<li class='list-group-item text-muted'>No hay partidas como director.</li>";
-          } else {
-            ul.innerHTML = partidas.map(p =>
-              `<li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="/partida_detail?partidaId=${p.id}" class="text-decoration-none">${p.titulo}</a>
-                <span class="badge bg-secondary">${p.sistemaJuego.nombre || ''}</span>
-              </li>`
-            ).join('');
-          }
-        });
-    }
-
-    // Sistemas seguidos
-    const divSistemas = document.getElementById('sistemas-seguidos');
-    if (usuario.id) {
-      fetch(`/api/usuarios/${usuario.id}/sistemas-seguidos`)
-        .then(res => res.ok ? res.json() : [])
-        .then(sistemas => {
-          if (!sistemas.length) {
-            divSistemas.innerHTML = "<span class='text-muted'>No sigues ningún sistema.</span>";
-          } else {
-            divSistemas.innerHTML = sistemas.map(s =>
-              `<a href="/sistema_detail?sistemaId=${s.id}" class="badge bg-primary me-2 mb-2 text-decoration-none text-light">${s.nombre}</a>`
-            ).join('');
-          }
-        });
-    }
+  function cargarPartidasDirector(userId) {
+    fetch(`/api/usuarios/${userId}/partidas/director`)
+      .then(res => res.ok ? res.json() : [])
+      .then(partidas => {
+        const ul = document.getElementById('partidas-director');
+        if (!ul) return;
+        if (!partidas.length) {
+          ul.innerHTML = "<li class='list-group-item text-muted'>No hay partidas como director.</li>";
+        } else {
+          ul.innerHTML = partidas.map(p =>
+            `<li class="list-group-item d-flex justify-content-between align-items-center">
+              <a href="/partida_detail?partidaId=${p.id}" class="text-decoration-none">${p.titulo}</a>
+              <span class="badge bg-secondary">${p.sistemaJuego?.nombre || ''}</span>
+            </li>`
+          ).join('');
+        }
+      });
   }
 
-  if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
-    if (adminBtnLi) adminBtnLi.style.display = "block";
-  } else {
-    if (adminBtnLi) adminBtnLi.style.display = "none";
+  function cargarSistemasSeguidos(userId) {
+    fetch(`/api/usuarios/${userId}/sistemas-seguidos`)
+      .then(res => res.ok ? res.json() : [])
+      .then(sistemas => {
+        const div = document.getElementById('sistemas-seguidos');
+        if (!div) return;
+        if (!sistemas.length) {
+          div.innerHTML = "<span class='text-muted'>No sigue ningún sistema.</span>";
+        } else {
+          div.innerHTML = sistemas.map(s =>
+            `<a href="/sistema_detail?sistemaId=${s.id}" class="badge bg-primary me-2 mb-2 text-decoration-none text-light">${s.nombre}</a>`
+          ).join('');
+        }
+      });
   }
-
-  function activarEdicionPerfil(usuario) {
-    // Nombre de usuario
-    const nombreTd = document.getElementById('nombre-usuario');
-    nombreTd.innerHTML = `<input type="text" class="form-control" id="input-nombre" value="${usuario.nombreUsuario}">`;
-
-    // Email
-    const emailTd = document.getElementById('email-usuario');
-    emailTd.innerHTML = `<input type="email" class="form-control" id="input-email" value="${usuario.email}">`;
-
-    // Biografía
-    const bioTd = document.getElementById('biografia-usuario');
-    bioTd.innerHTML = `<textarea class="form-control" id="input-biografia" rows="3">${usuario.biografia || ''}</textarea>`;
-
-    // Mostrar icono de editar y de reset
-    document.getElementById('edit-avatar-icon').style.display = "block";
-    document.getElementById('reset-avatar-icon').style.display = "block";
-
-    // Botones
-    document.getElementById('btn-editar-perfil').style.display = 'none';
-    if (!document.getElementById('btn-guardar-perfil')) {
-      const guardarBtn = document.createElement('button');
-      guardarBtn.id = 'btn-guardar-perfil';
-      guardarBtn.className = 'btn btn-success btn-sm me-2';
-      guardarBtn.textContent = 'Guardar';
-      guardarBtn.onclick = guardarCambiosPerfil;
-
-      const cancelarBtn = document.createElement('button');
-      cancelarBtn.id = 'btn-cancelar-perfil';
-      cancelarBtn.className = 'btn btn-secondary btn-sm';
-      cancelarBtn.textContent = 'Cancelar';
-      cancelarBtn.onclick = () => location.reload();
-
-      nombreTd.parentElement.appendChild(guardarBtn);
-      nombreTd.parentElement.appendChild(cancelarBtn);
-    }
-  }
-
-  // Foto de perfil click => input file
-  document.getElementById('avatar-container').addEventListener('click', function(e) {
-    if (document.getElementById('edit-avatar-icon').style.display === "block") {
-      document.getElementById('input-foto').click();
-    }
-  });
-
-  // Previsualizar imagen
-  document.getElementById('input-foto').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        document.getElementById('profile-avatar').src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-
-  function guardarCambiosPerfil() {
-    const nombre = document.getElementById('input-nombre').value;
-    const email = document.getElementById('input-email').value;
-    const biografia = document.getElementById('input-biografia').value;
-    const fileInput = document.getElementById('input-foto');
-    const file = fileInput.files[0];
-
-    function actualizarPerfil(avatarUrl) {
-      if (document.getElementById('profile-avatar').src.includes('standard_pfp.png')) {
-        avatarUrl = 'standard_pfp.png';
-      }
-
-      fetch(`/api/usuarios/${usuario.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombreUsuario: nombre,
-          email: email,
-          biografia: biografia,
-          avatarUrl: avatarUrl
-        })
-      })
-      .then(res => res.ok ? res.json() : Promise.reject())
-      .then(usuarioActualizado => {
-        location.reload();
-      })
-      .catch(() => alert('Error al actualizar el perfil'));
-    }
-
-    if (file) {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      fetch('/api/usuarios/upload-foto', {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.ok ? res.text() : Promise.reject())
-      .then(avatarUrl => {
-        actualizarPerfil(avatarUrl);
-      })
-      .catch(() => alert('Error al subir la imagen'));
-    } else {
-      actualizarPerfil(usuario.avatarUrl || '');
-    }
-  }
-
-  document.getElementById('btn-editar-perfil').addEventListener('click', function() {
-    activarEdicionPerfil(usuario);
-  });
-
-  document.getElementById('reset-avatar-icon').addEventListener('click', function(e) {
-    e.stopPropagation();
-    document.getElementById('profile-avatar').src = 'standard_pfp.png';
-    document.getElementById('input-foto').value = '';
-  });
 });

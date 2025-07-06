@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.rod.rollenia.entity.Documento;
 import com.rod.rollenia.service.DocumentoService;
+import com.rod.rollenia.service.NotificacionService;
+import com.rod.rollenia.entity.Usuario;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,14 +17,29 @@ import java.util.Optional;
 public class DocumentoController {
 
     private final DocumentoService documentoService;
+    private final NotificacionService notificacionService;
 
-    public DocumentoController(DocumentoService documentoService) {
+    public DocumentoController(DocumentoService documentoService, NotificacionService notificacionService) {
         this.documentoService = documentoService;
+        this.notificacionService = notificacionService;
     }
 
     @PostMapping
     public ResponseEntity<Documento> crearDocumento(@RequestBody Documento documento) {
         Documento nuevoDocumento = documentoService.crearDocumento(documento);
+
+        // Notificar a los seguidores
+        if (documento.getSistema() != null && documento.getSistema().getSeguidores() != null) {
+            for (Usuario seguidor : documento.getSistema().getSeguidores()) {
+                notificacionService.crearNotificacion(
+                    seguidor,
+                    "DOCUMENTO_NUEVO_SISTEMA",
+                    "Se ha añadido un nuevo documento al sistema '" + documento.getSistema().getNombre() + "': " + documento.getTitulo(),
+                    "/sistema_detail?sistemaId=" + nuevoDocumento.getId()
+                );
+            }
+        }
+
         return new ResponseEntity<>(nuevoDocumento, HttpStatus.CREATED);
     }
 

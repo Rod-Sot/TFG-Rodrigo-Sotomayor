@@ -60,6 +60,11 @@ public class ViewController {
         return "perfil_user";
     }
 
+    @GetMapping("/perfil_publico")
+    public String perfilPublico() {
+        return "perfil_publico";
+    }
+
     @GetMapping("/create-topic")
     public String createTopicForm() {
         return "create-topic";

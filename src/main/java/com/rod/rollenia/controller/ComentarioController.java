@@ -4,6 +4,7 @@ import com.rod.rollenia.entity.Comentario;
 import com.rod.rollenia.entity.Noticia;
 import com.rod.rollenia.entity.Usuario;
 import com.rod.rollenia.service.ComentarioService;
+import com.rod.rollenia.service.NotificacionService;
 import com.rod.rollenia.repository.NoticiaRepository;
 import com.rod.rollenia.repository.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,13 @@ public class ComentarioController {
     private final ComentarioService comentarioService;
     private final NoticiaRepository noticiaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
-    public ComentarioController(ComentarioService comentarioService, NoticiaRepository noticiaRepository, UsuarioRepository usuarioRepository) {
+    public ComentarioController(ComentarioService comentarioService, NoticiaRepository noticiaRepository, UsuarioRepository usuarioRepository, NotificacionService notificacionService) {
         this.comentarioService = comentarioService;
         this.noticiaRepository = noticiaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping("/noticia/{noticiaId}")
@@ -51,6 +54,15 @@ public class ComentarioController {
         comentario.setFechaCreacion(LocalDateTime.now());
 
         Comentario guardado = comentarioService.guardarComentario(comentario);
+
+        // Enviar notificación al autor
+        notificacionService.crearNotificacion(
+                noticiaOpt.get().getAutor(),
+                "NOTICIA_COMENTARIO",
+                autorOpt.get().getNombreUsuario() + " ha comentado en tu noticia: '" + noticiaOpt.get().getTitulo() + "'.",
+                "/detalles_noticias/" + noticiaOpt.get().getId()
+        );
+
         return ResponseEntity.status(HttpStatus.CREATED).body(guardado);
     }
 

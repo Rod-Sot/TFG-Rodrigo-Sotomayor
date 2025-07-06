@@ -104,22 +104,18 @@ public class UsuarioService {
         return partidaRepository.findByJugadoresContaining(usuario);
     }
 
-    // Cambiar el rol de un usuario
     public void cambiarRol(Long id, String nuevoRol, Usuario solicitante) {
         Usuario usuario = usuarioRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
 
-        // No permitir modificar al OWNER
         if ("OWNER".equals(usuario.getRol())) {
             throw new IllegalStateException("No se puede modificar al OWNER.");
         }
 
-        // Solo OWNER puede ascender/revocar admins
         if (!"OWNER".equals(solicitante.getRol())) {
             throw new SecurityException("Solo el OWNER puede cambiar roles de admin.");
         }
 
-        // Solo puede haber un OWNER
         if ("OWNER".equalsIgnoreCase(nuevoRol) && usuarioRepository.existsByRol("OWNER")) {
             throw new IllegalStateException("Ya existe un usuario OWNER.");
         }
@@ -128,14 +124,12 @@ public class UsuarioService {
         usuarioRepository.save(usuario);
     }
 
-    // Banear usuario
     public void banearUsuario(Long id, Usuario solicitante) {
         Usuario usuario = usuarioRepository.findById(id)
             .orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado con ID: " + id));
         if ("OWNER".equals(usuario.getRol())) {
             throw new IllegalStateException("No se puede banear al OWNER.");
         }
-        // Solo OWNER o ADMIN pueden banear, pero no a OWNER ni a otros ADMIN si no eres OWNER
         if ("ADMIN".equals(usuario.getRol()) && !"OWNER".equals(solicitante.getRol())) {
             throw new SecurityException("Solo el OWNER puede banear a un ADMIN.");
         }
@@ -148,7 +142,6 @@ public class UsuarioService {
         if ("OWNER".equals(usuario.getRol())) {
             throw new IllegalStateException("No se puede modificar al OWNER.");
         }
-        // Solo OWNER o ADMIN pueden desbanear, pero no a OWNER ni a otros ADMIN si no eres OWNER
         if ("ADMIN".equals(usuario.getRol()) && !"OWNER".equals(solicitante.getRol())) {
             throw new SecurityException("Solo el OWNER puede desbanear a un ADMIN.");
         }
@@ -161,7 +154,6 @@ public class UsuarioService {
         if (usuarioId.equals(amigoId)) throw new IllegalArgumentException("No puedes agregarte a ti mismo como amigo.");
         Usuario usuario = obtenerUsuarioPorId(usuarioId).orElseThrow();
         Usuario amigo = obtenerUsuarioPorId(amigoId).orElseThrow();
-        // Comprobar si ya son amigos
         if (usuario.getAmigos().contains(amigo)) {
             return;
         }
@@ -179,6 +171,13 @@ public class UsuarioService {
         amigo.getAmigos().remove(usuario);
         guardarUsuario(usuario);
         guardarUsuario(amigo);
+    }
+
+    public List<Usuario> buscarPorNombreUsuario(String nombre, Long idSolicitante) {
+        return usuarioRepository.findByNombreUsuarioContainingIgnoreCase(nombre)
+            .stream()
+            .filter(u -> !u.getId().equals(idSolicitante))
+            .toList();
     }
 }
 

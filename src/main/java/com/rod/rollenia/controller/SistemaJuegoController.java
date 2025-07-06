@@ -78,6 +78,23 @@ public class SistemaJuegoController {
 
         return ResponseEntity.ok().build();
     }
+    @PostMapping("/{id}/dejar-seguir")
+    public ResponseEntity<?> dejarDeSeguirSistema(@PathVariable Long id, @RequestBody SeguirRequest request) {
+        Optional<Usuario> usuarioOpt = usuarioService.obtenerUsuarioPorId(request.getUsuarioId());
+        Optional<SistemaJuego> sistemaOpt = sistemaJuegoService.obtenerSistemaJuegoPorId(id);
+
+        if (usuarioOpt.isEmpty() || sistemaOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Usuario usuario = usuarioOpt.get();
+        SistemaJuego sistema = sistemaOpt.get();
+
+        usuario.getSistemasSeguidos().removeIf(s -> s.getId().equals(sistema.getId()));
+        usuarioService.guardarUsuario(usuario);
+
+        return ResponseEntity.ok().build();
+    }
     @GetMapping("/{id}/siguiendo")
     public ResponseEntity<Boolean> estaSiguiendo(@PathVariable Long id, @RequestParam Long usuarioId) {
         Optional<Usuario> usuarioOpt = usuarioService.obtenerUsuarioPorId(usuarioId);

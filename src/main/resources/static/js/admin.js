@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
     })
     .then(usuariosData => {
       if (!usuariosData) return;
-      usuarios = usuariosData; // Guarda los usuarios en la variable global
+      usuarios = usuariosData;
       const usuariosList = document.getElementById('usuarios-list');
       usuariosList.innerHTML = `
         <table class="table table-striped">
@@ -43,7 +43,11 @@ document.addEventListener("DOMContentLoaded", function() {
           <tbody>
             ${usuariosData.map(u => `
               <tr>
-                <td>${u.nombreUsuario}</td>
+                <td>
+                  <a href="/perfil_publico?id=${u.id}" class="text-decoration-none text-primary" target="_blank">
+                    ${u.nombreUsuario}
+                  </a>
+                </td>
                 <td>${u.email}</td>
                 <td>${u.partidasCreadas ? u.partidasCreadas.length : 0}</td>
                 <td>${u.partidasComoJugador ? u.partidasComoJugador.length : 0}</td>

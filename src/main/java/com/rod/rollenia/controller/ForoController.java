@@ -7,6 +7,7 @@ import com.rod.rollenia.repository.ForoRepository;
 import com.rod.rollenia.repository.SistemaJuegoRepository;
 import com.rod.rollenia.repository.UsuarioRepository;
 import com.rod.rollenia.service.ForoService;
+import com.rod.rollenia.service.NotificacionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,12 +23,20 @@ public class ForoController {
     private final SistemaJuegoRepository sistemaJuegoRepository;
     private final ForoRepository foroRepository;
     private final UsuarioRepository usuarioRepository;
+    private final NotificacionService notificacionService;
 
-    public ForoController(ForoService foroService, SistemaJuegoRepository sistemaJuegoRepository, ForoRepository foroRepository, UsuarioRepository usuarioRepository) {
+    public ForoController(
+            ForoService foroService,
+            SistemaJuegoRepository sistemaJuegoRepository,
+            ForoRepository foroRepository,
+            UsuarioRepository usuarioRepository,
+            NotificacionService notificacionService
+    ) {
         this.foroService = foroService;
         this.sistemaJuegoRepository = sistemaJuegoRepository;
         this.foroRepository = foroRepository;
         this.usuarioRepository = usuarioRepository;
+        this.notificacionService = notificacionService;
     }
 
     @GetMapping
@@ -69,6 +78,19 @@ public class ForoController {
         }
 
         foroRepository.save(foro);
+
+        // Notificar a los seguidores
+        if (foro.getSistemaJuego() != null && foro.getSistemaJuego().getSeguidores() != null) {
+            for (Usuario seguidor : foro.getSistemaJuego().getSeguidores()) {
+                notificacionService.crearNotificacion(
+                    seguidor,
+                    "FORO_NUEVO_SISTEMA",
+                    "Se ha creado un nuevo foro sobre '" + foro.getSistemaJuego().getNombre() + "': " + foro.getTitulo(),
+                    "/foro_detail?id=" + foro.getId()
+                );
+            }
+        }
+
         return ResponseEntity.ok(foro);
     }
 

@@ -23,8 +23,7 @@ public class Usuario {
     private String avatarUrl = "standard_pfp.png";
     private LocalDate fechaRegistro;
     private String rol; // valores: "USER", "USER_NEWS", "ADMIN", "OWNER"
-    private boolean baneado = false; // Indica si el usuario está baneado
-    // Relaciones
+    private boolean baneado = false;
     @OneToMany(mappedBy = "autor")
     @JsonIgnoreProperties("autor")
     private List<Noticia> noticiasPublicadas = new ArrayList<>();
@@ -51,11 +50,11 @@ public class Usuario {
         joinColumns = @JoinColumn(name = "usuario_id"),
         inverseJoinColumns = @JoinColumn(name = "amigo_id")
     )
-    @JsonIgnoreProperties("amigosConmigo")
+    @JsonIgnoreProperties({"amigos", "amigosConmigo", "partidasComoJugador", "partidasCreadas", "noticiasPublicadas", "sistemasSeguidos"})
     private Set<Usuario> amigos = new HashSet<>();
 
     @ManyToMany(mappedBy = "amigos")
-    @JsonIgnoreProperties("amigos")
+    @JsonIgnoreProperties({"amigos", "amigosConmigo", "partidasComoJugador", "partidasCreadas", "noticiasPublicadas", "sistemasSeguidos"})
     private Set<Usuario> amigosConmigo = new HashSet<>();
 
     @Column(length = 1000)

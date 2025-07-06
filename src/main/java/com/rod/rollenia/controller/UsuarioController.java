@@ -236,7 +236,6 @@ public class UsuarioController {
         return ResponseEntity.ok().build();
     }
 
-    // Obtener amigos del usuario logueado
     @GetMapping("/{id}/amigos")
     public ResponseEntity<Set<Usuario>> obtenerAmigos(@PathVariable Long id) {
         Optional<Usuario> usuarioOpt = usuarioService.obtenerUsuarioPorId(id);
@@ -273,5 +272,14 @@ public class UsuarioController {
             usuario.getFechaRegistro()
         );
         return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<List<Usuario>> buscarUsuariosPorNombre(
+            @RequestParam("nombre") String nombre,
+            @RequestParam("idSolicitante") Long idSolicitante) {
+        List<Usuario> usuarios = usuarioService.buscarPorNombreUsuario(nombre, idSolicitante);
+        usuarios.forEach(u -> u.setPassword(null));
+        return ResponseEntity.ok(usuarios);
     }
 }

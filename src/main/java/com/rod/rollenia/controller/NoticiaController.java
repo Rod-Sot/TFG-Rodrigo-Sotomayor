@@ -5,10 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.rod.rollenia.entity.Noticia;
 import com.rod.rollenia.service.NoticiaService;
+import com.rod.rollenia.service.NotificacionService;
 import com.rod.rollenia.entity.NoticiaVoto;
+import com.rod.rollenia.entity.SistemaJuego;
 import com.rod.rollenia.entity.Usuario;
 import com.rod.rollenia.repository.NoticiaRepository;
 import com.rod.rollenia.repository.NoticiaVotoRepository;
+import com.rod.rollenia.repository.SistemaJuegoRepository;
 import com.rod.rollenia.repository.UsuarioRepository;
 import com.rod.rollenia.security.JwtUtil;
 
@@ -26,13 +29,17 @@ public class NoticiaController {
     private final NoticiaRepository noticiaRepository;
     private final UsuarioRepository usuarioRepository;
     private final JwtUtil jwtUtil;
+    private final NotificacionService notificacionService;
+    private final SistemaJuegoRepository sistemaJuegoRepository;
 
-    public NoticiaController(NoticiaService noticiaService, NoticiaVotoRepository noticiaVotoRepository, NoticiaRepository noticiaRepository, UsuarioRepository usuarioRepository, JwtUtil jwtUtil) {
+    public NoticiaController(NoticiaService noticiaService, NoticiaVotoRepository noticiaVotoRepository, NoticiaRepository noticiaRepository, UsuarioRepository usuarioRepository, JwtUtil jwtUtil, NotificacionService notificacionService, SistemaJuegoRepository sistemaJuegoRepository) {
         this.noticiaService = noticiaService;
         this.noticiaVotoRepository = noticiaVotoRepository;
         this.noticiaRepository = noticiaRepository;
         this.usuarioRepository = usuarioRepository;
         this.jwtUtil = jwtUtil;
+        this.notificacionService = notificacionService;
+        this.sistemaJuegoRepository = sistemaJuegoRepository;
     }
 
     @PostMapping
@@ -41,7 +48,25 @@ public class NoticiaController {
         Usuario autor = usuarioRepository.findByEmail(email).orElseThrow();
         noticia.setAutor(autor);
         noticia.setFechaPublicacion(java.time.LocalDate.now());
+
+        if (noticia.getSistemaRelacionado() != null && noticia.getSistemaRelacionado().getId() != null) {
+            SistemaJuego sistema = sistemaJuegoRepository.findById(noticia.getSistemaRelacionado().getId())
+                .orElse(null);
+            noticia.setSistemaRelacionado(sistema);
+        }
+
         Noticia nuevaNoticia = noticiaService.crearNoticia(noticia);
+
+        if (nuevaNoticia.getSistemaRelacionado() != null && nuevaNoticia.getSistemaRelacionado().getSeguidores() != null) {
+            for (Usuario seguidor : nuevaNoticia.getSistemaRelacionado().getSeguidores()) {
+                notificacionService.crearNotificacion(
+                    seguidor,
+                    "NOTICIA_NUEVA_SISTEMA",
+                    "Se ha publicado una nueva noticia sobre '" + nuevaNoticia.getSistemaRelacionado().getNombre() + "': " + nuevaNoticia.getTitulo(),
+                    "/detalles_noticias/" + nuevaNoticia.getId()
+                );
+            }
+        }
         return new ResponseEntity<>(nuevaNoticia, HttpStatus.CREATED);
     }
 
@@ -117,6 +142,15 @@ public class NoticiaController {
         noticia.setMeGusta(noticiaVotoRepository.countByNoticiaIdAndEsLikeTrue(noticia.getId()));
         noticia.setNoMeGusta(noticiaVotoRepository.countByNoticiaIdAndEsLikeFalse(noticia.getId()));
         noticiaRepository.save(noticia);
+        if (!noticia.getAutor().getId().equals(usuarioId)) { // No notifiques si el autor se da like a sí mismo
+            notificacionService.crearNotificacion(
+                noticia.getAutor(),
+                "NOTICIA_LIKE",
+                usuarioRepository.findById(usuarioId).map(usr -> usr.getNombreUsuario()).orElse("Alguien") +
+                    " ha dado me gusta a tu noticia: '" + noticia.getTitulo() + "'.",
+                "/detalles_noticias/" + noticia.getId()
+            );
+        }
 
         return ResponseEntity.ok().build();
     }
