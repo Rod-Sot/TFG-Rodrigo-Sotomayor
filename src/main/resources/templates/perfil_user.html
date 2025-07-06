@@ -58,11 +58,28 @@
 <main class="container my-4">
   <div class="profile-container">
     <div class="profile-header">
-      <img src="/css/images/default_avatar.png" alt="Avatar" class="profile-avatar" id="profile-avatar">
+      <div class="position-relative d-inline-block" id="avatar-container" style="width:120px;height:120px;">
+        <span id="reset-avatar-icon" class="position-absolute top-0 end-0 bg-light rounded-circle p-1"
+              style="cursor:pointer; display:none; z-index:2; font-size: 1.3em;">
+          ❌
+        </span>
+        <img id="profile-avatar" src="standard_pfp.png" class="rounded-circle" style="width:120px;height:120px;object-fit:cover;">
+        <span id="edit-avatar-icon" class="position-absolute bottom-0 end-0 bg-light rounded-circle p-1"
+              style="cursor:pointer; display:none; z-index:2; font-size: 1.3em;">
+          ✏️
+        </span>
+        <input type="file" id="input-foto" accept="image/*" style="display:none;">
+      </div>
       <div>
         <h4 id="nombre-usuario">Nombre de usuario</h4>
         <p id="email-usuario">Email: usuario@ejemplo.com</p>
-        <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalEditarPerfil">Editar perfil</button>
+        <button class="btn btn-outline-primary btn-sm" id="btn-editar-perfil">Editar perfil</button>
+      </div>
+    </div>
+    <div class="profile-section mt-4">
+      <h5 class="fw-bold">Biografía</h5>
+      <div class="bg-light border rounded p-3 mb-3" style="min-height:60px;">
+        <p id="biografia-usuario" class="mb-0"></p>
       </div>
     </div>
     <div class="profile-section">
@@ -88,34 +105,5 @@
     <p class="mb-0">&copy; 2025 Rollenia. Todos los derechos reservados.</p>
   </div>
 </footer>
-<!-- Modal Editar Perfil -->
-<div class="modal fade" id="modalEditarPerfil" tabindex="-1" aria-labelledby="modalEditarPerfilLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <form class="modal-content" id="form-editar-perfil">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalEditarPerfilLabel">Editar perfil</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <div class="mb-3">
-          <label for="input-nombre" class="form-label">Nombre de usuario</label>
-          <input type="text" class="form-control" id="input-nombre" required>
-        </div>
-        <div class="mb-3">
-          <label for="input-email" class="form-label">Email</label>
-          <input type="email" class="form-control" id="input-email" required>
-        </div>
-        <div class="mb-3">
-          <label for="input-foto" class="form-label">Foto de perfil (URL)</label>
-          <input type="file" class="form-control" id="input-foto" accept="image/*">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="submit" class="btn btn-primary">Guardar cambios</button>
-      </div>
-    </form>
-  </div>
-</div>
 </body>
 </html>

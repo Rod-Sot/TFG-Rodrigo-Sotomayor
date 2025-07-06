@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // Recupera el usuario del localStorage
   const usuarioStr = localStorage.getItem('usuario');
   if (!usuarioStr) {
-    // Si no hay usuario, redirige a login
+    // Sin usuario, redirige a login
     window.location.href = "/login";
     return;
   }
@@ -21,10 +21,9 @@ document.addEventListener("DOMContentLoaded", function() {
     return;
   }
 
-  // Si tienes el id, puedes obtener datos actualizados del backend:
   if (usuario.id) {
     fetch(`/api/usuarios/${usuario.id}`)
-      .then(res => res.ok ? res.json() : usuario) // Si falla, usa el local
+      .then(res => res.ok ? res.json() : usuario) 
       .then(datos => {
         usuario = datos;
         cargarPerfil(usuario);
@@ -37,6 +36,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById('nombre-usuario').textContent = usuario.nombreUsuario || 'Usuario';
     document.getElementById('email-usuario').textContent = 'Email: ' + (usuario.email || '');
     document.getElementById('profile-avatar').src = usuario.avatarUrl || 'standard_pfp.png';
+    document.getElementById('biografia-usuario').textContent = usuario.biografia || 'Escribe aquí tu biografía...';
     if (usuario.id) {
       // Partidas como jugador
       fetch(`/api/usuarios/${usuario.id}/partidas/jugador`)
@@ -65,8 +65,8 @@ document.addEventListener("DOMContentLoaded", function() {
           } else {
             ul.innerHTML = partidas.map(p =>
               `<li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="/detalles_partida?partidaId=${p.id}" class="text-decoration-none">${p.nombre}</a>
-                <span class="badge bg-secondary">${p.sistema || ''}</span>
+                <a href="/partida_detail?partidaId=${p.id}" class="text-decoration-none">${p.titulo}</a>
+                <span class="badge bg-secondary">${p.sistemaJuego.nombre || ''}</span>
               </li>`
             ).join('');
           }
@@ -89,38 +89,96 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
   }
-  const modalEditarPerfil = new bootstrap.Modal(document.getElementById('modalEditarPerfil'));
-  // Abrir modal al pulsar "Editar perfil"
-  document.querySelector('.btn-outline-primary.btn-sm').addEventListener('click', function() {
-    document.getElementById('input-nombre').value = usuario.nombreUsuario;
-    document.getElementById('input-email').value = usuario.email;
-    document.getElementById('input-foto').value = usuario.avatarUrl || '';
-    modalEditarPerfil.show();
+
+  
+  const adminBtnLi = document.getElementById('admin-btn-li');
+
+  if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
+    adminBtnLi.style.display = "block";
+  } else {
+    adminBtnLi.style.display = "none";
+  }
+
+  function activarEdicionPerfil(usuario) {
+    // Nombre de usuario
+    const nombreTd = document.getElementById('nombre-usuario');
+    nombreTd.innerHTML = `<input type="text" class="form-control" id="input-nombre" value="${usuario.nombreUsuario}">`;
+
+    // Email
+    const emailTd = document.getElementById('email-usuario');
+    emailTd.innerHTML = `<input type="email" class="form-control" id="input-email" value="${usuario.email}">`;
+
+    // Biografía
+    const bioTd = document.getElementById('biografia-usuario');
+    bioTd.innerHTML = `<textarea class="form-control" id="input-biografia" rows="3">${usuario.biografia || ''}</textarea>`;
+
+    // Mostrar icono de editar y de reset
+    document.getElementById('edit-avatar-icon').style.display = "block";
+    document.getElementById('reset-avatar-icon').style.display = "block";
+
+    // Botones
+    document.getElementById('btn-editar-perfil').style.display = 'none';
+    if (!document.getElementById('btn-guardar-perfil')) {
+      const guardarBtn = document.createElement('button');
+      guardarBtn.id = 'btn-guardar-perfil';
+      guardarBtn.className = 'btn btn-success btn-sm me-2';
+      guardarBtn.textContent = 'Guardar';
+      guardarBtn.onclick = guardarCambiosPerfil;
+
+      const cancelarBtn = document.createElement('button');
+      cancelarBtn.id = 'btn-cancelar-perfil';
+      cancelarBtn.className = 'btn btn-secondary btn-sm';
+      cancelarBtn.textContent = 'Cancelar';
+      cancelarBtn.onclick = () => location.reload();
+
+      nombreTd.parentElement.appendChild(guardarBtn);
+      nombreTd.parentElement.appendChild(cancelarBtn);
+    }
+  }
+
+  // Foto de perfil click => input file
+  document.getElementById('avatar-container').addEventListener('click', function(e) {
+    if (document.getElementById('edit-avatar-icon').style.display === "block") {
+      document.getElementById('input-foto').click();
+    }
   });
 
-  // Guardar cambios
-  document.getElementById('form-editar-perfil').addEventListener('submit', function(e) {
-    e.preventDefault();
+  // Previsualizar imagen
+  document.getElementById('input-foto').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        document.getElementById('profile-avatar').src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
 
+  function guardarCambiosPerfil() {
+    const nombre = document.getElementById('input-nombre').value;
+    const email = document.getElementById('input-email').value;
+    const biografia = document.getElementById('input-biografia').value;
     const fileInput = document.getElementById('input-foto');
     const file = fileInput.files[0];
 
     function actualizarPerfil(avatarUrl) {
+      if (document.getElementById('profile-avatar').src.includes('standard_pfp.png')) {
+        avatarUrl = 'standard_pfp.png';
+      }
+
       fetch(`/api/usuarios/${usuario.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          nombreUsuario: document.getElementById('input-nombre').value,
-          email: document.getElementById('input-email').value,
-          avatarUrl: avatarUrl // la ruta de la imagen subida
+          nombreUsuario: nombre,
+          email: email,
+          biografia: biografia,
+          avatarUrl: avatarUrl
         })
       })
       .then(res => res.ok ? res.json() : Promise.reject())
       .then(usuarioActualizado => {
-        document.getElementById('nombre-usuario').textContent = usuarioActualizado.nombreUsuario;
-        document.getElementById('email-usuario').textContent = "Email: " + usuarioActualizado.email;
-        document.getElementById('profile-avatar').src = usuarioActualizado.avatarUrl || '/css/images/default_avatar.png';
-        modalEditarPerfil.hide();
         location.reload();
       })
       .catch(() => alert('Error al actualizar el perfil'));
@@ -142,12 +200,15 @@ document.addEventListener("DOMContentLoaded", function() {
     } else {
       actualizarPerfil(usuario.avatarUrl || '');
     }
-  });
-  const adminBtnLi = document.getElementById('admin-btn-li');
-
-  if (usuario && (usuario.rol === "ADMIN" || usuario.rol === "OWNER")) {
-    adminBtnLi.style.display = "block";
-  } else {
-    adminBtnLi.style.display = "none";
   }
+
+  document.getElementById('btn-editar-perfil').addEventListener('click', function() {
+    activarEdicionPerfil(usuario);
+  });
+
+  document.getElementById('reset-avatar-icon').addEventListener('click', function(e) {
+    e.stopPropagation();
+    document.getElementById('profile-avatar').src = 'standard_pfp.png';
+    document.getElementById('input-foto').value = '';
+  });
 });

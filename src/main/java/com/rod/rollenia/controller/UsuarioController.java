@@ -9,6 +9,7 @@ import com.rod.rollenia.entity.SistemaJuego;
 import com.rod.rollenia.entity.Partida;
 import com.rod.rollenia.service.UsuarioService;
 import com.rod.rollenia.security.JwtUtil;
+import com.rod.rollenia.dto.UsuarioPublicoDTO;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -72,9 +73,23 @@ public class UsuarioController {
             return ResponseEntity.notFound().build();
         }
         Usuario usuario = usuarioOpt.get();
+
+        // Eliminar avatar antiguo
+        String oldAvatar = usuario.getAvatarUrl();
+        String newAvatar = usuarioActualizado.getAvatarUrl();
+        if (oldAvatar != null && newAvatar != null && !oldAvatar.equals(newAvatar) && !oldAvatar.contains("standard_pfp.png")) {
+            try {
+                Path oldPath = Paths.get("src/main/resources/static" + oldAvatar);
+                Files.deleteIfExists(oldPath);
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            }
+        }
+
         usuario.setNombreUsuario(usuarioActualizado.getNombreUsuario());
         usuario.setEmail(usuarioActualizado.getEmail());
-        usuario.setAvatarUrl(usuarioActualizado.getAvatarUrl());
+        usuario.setAvatarUrl(newAvatar);
+        usuario.setBiografia(usuarioActualizado.getBiografia());
 
         usuarioService.guardarUsuario(usuario);
         return ResponseEntity.ok(usuario);
@@ -124,8 +139,22 @@ public class UsuarioController {
     @PostMapping("/upload-foto")
     public ResponseEntity<String> uploadFoto(@RequestParam("file") MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("");
+            return ResponseEntity.badRequest().body("Archivo vacío.");
         }
+
+        // Limitar tipo
+        String contentType = file.getContentType();
+        if (contentType == null || 
+            !(contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/jpg"))) {
+            return ResponseEntity.badRequest().body("Solo se permiten imágenes JPG, JPEG o PNG.");
+        }
+
+        // Limitar tamaño
+        long maxSize = 2 * 1024 * 1024; // 2MB
+        if (file.getSize() > maxSize) {
+            return ResponseEntity.badRequest().body("La imagen no puede superar los 2MB.");
+        }
+
         String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
         Path uploadPath = Paths.get("src/main/resources/static/uploads/");
         Files.createDirectories(uploadPath);
@@ -227,5 +256,22 @@ public class UsuarioController {
     public ResponseEntity<Void> eliminarAmigo(@PathVariable Long id, @PathVariable Long amigoId) {
         usuarioService.eliminarAmigo(id, amigoId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/perfil-publico")
+    public ResponseEntity<UsuarioPublicoDTO> verPerfilPublico(@PathVariable Long id) {
+        Optional<Usuario> usuarioOpt = usuarioService.obtenerUsuarioPorId(id);
+        if (usuarioOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        Usuario usuario = usuarioOpt.get();
+        UsuarioPublicoDTO dto = new UsuarioPublicoDTO(
+            usuario.getId(),
+            usuario.getNombreUsuario(),
+            usuario.getAvatarUrl(),
+            usuario.getBiografia(),
+            usuario.getFechaRegistro()
+        );
+        return ResponseEntity.ok(dto);
     }
 }

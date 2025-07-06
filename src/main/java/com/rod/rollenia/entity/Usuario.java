@@ -20,7 +20,7 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
     private String password;
-    private String avatarUrl;
+    private String avatarUrl = "standard_pfp.png";
     private LocalDate fechaRegistro;
     private String rol; // valores: "USER", "USER_NEWS", "ADMIN", "OWNER"
     private boolean baneado = false; // Indica si el usuario está baneado
@@ -57,6 +57,9 @@ public class Usuario {
     @ManyToMany(mappedBy = "amigos")
     @JsonIgnoreProperties("amigos")
     private Set<Usuario> amigosConmigo = new HashSet<>();
+
+    @Column(length = 1000)
+    private String biografia = "Escribe aquí tu biografía...";
 
     public Long getId() {
         return id;
@@ -167,6 +170,14 @@ public class Usuario {
 
     public void setAmigosConmigo(Set<Usuario> amigosConmigo) {
         this.amigosConmigo = amigosConmigo;
+    }
+
+    public String getBiografia() {
+        return biografia;
+    }
+
+    public void setBiografia(String biografia) {
+        this.biografia = biografia;
     }
 
     public Usuario() {

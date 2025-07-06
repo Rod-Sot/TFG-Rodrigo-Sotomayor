@@ -74,6 +74,9 @@ public class UsuarioService {
         if (usuario.getRol() == null) {
             usuario.setRol("USER");
         }
+        if (usuario.getBiografia() == null || usuario.getBiografia().isBlank()) {
+            usuario.setBiografia("Escribe aquí tu biografía...");
+        }
         return usuarioRepository.save(usuario);
     }
 
