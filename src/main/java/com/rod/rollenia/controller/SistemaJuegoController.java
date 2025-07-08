@@ -4,11 +4,15 @@ package com.rod.rollenia.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import com.rod.rollenia.entity.SistemaJuego;
 import com.rod.rollenia.service.SistemaJuegoService;
 import com.rod.rollenia.entity.Usuario;
 import com.rod.rollenia.service.UsuarioService;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,6 +140,28 @@ public class SistemaJuegoController {
             return ResponseEntity.ok(sistemaJuego);
         } catch (jakarta.persistence.EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+    @PutMapping(value = "/admin/sistemas/{id}/con-imagen", consumes = {"multipart/form-data"})
+    public ResponseEntity<SistemaJuego> actualizarSistemaAdminConImagen(
+            @PathVariable Long id,
+            @RequestPart("sistema") SistemaJuego sistemaJuegoActualizado,
+            @RequestPart(value = "imagen", required = false) MultipartFile imagenFile) {
+        try {
+            if (imagenFile != null && !imagenFile.isEmpty()) {
+                String nombreArchivo = "sistema_" + id + "_" + System.currentTimeMillis() + "_" + imagenFile.getOriginalFilename();
+                Path rutaDestino = Paths.get("src/main/resources/static/img/sistemas/" + nombreArchivo);
+                Files.createDirectories(rutaDestino.getParent());
+                Files.write(rutaDestino, imagenFile.getBytes());
+                sistemaJuegoActualizado.setImagenUrl("/img/sistemas/" + nombreArchivo);
+            }
+            SistemaJuego sistemaJuego = sistemaJuegoService.actualizarSistemaJuego(id, sistemaJuegoActualizado);
+            return ResponseEntity.ok(sistemaJuego);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

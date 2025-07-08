@@ -33,7 +33,7 @@ public class DocumentoController {
             for (Usuario seguidor : documento.getSistema().getSeguidores()) {
                 notificacionService.crearNotificacion(
                     seguidor,
-                    "DOCUMENTO_NUEVO_SISTEMA",
+                    "NUEVO_DOCUMENTO_SISTEMA",
                     "Se ha añadido un nuevo documento al sistema '" + documento.getSistema().getNombre() + "': " + documento.getTitulo(),
                     "/sistema_detail?sistemaId=" + nuevoDocumento.getId()
                 );

@@ -4,9 +4,6 @@ import com.rod.rollenia.entity.Notificacion;
 import com.rod.rollenia.entity.Usuario;
 import com.rod.rollenia.repository.NotificacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,9 +14,6 @@ public class NotificacionService {
 
     @Autowired
     private NotificacionRepository notificacionRepository;
-
-    @Autowired
-    private JavaMailSender mailSender;
 
     public void crearNotificacion(Usuario usuario, String tipo, String mensaje, String url) {
         Notificacion n = new Notificacion();
@@ -49,10 +43,5 @@ public class NotificacionService {
 
     public Notificacion buscarPorId(Long id) {
         return notificacionRepository.findById(id).orElse(null);
-    }
-
-    @Scheduled(cron = "0 0 9 * * *")
-    public void enviarResumenDiario() {
-        
     }
 }

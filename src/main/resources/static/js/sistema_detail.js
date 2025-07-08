@@ -351,7 +351,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(s => {
         detalleDiv.innerHTML = `
           <div class="text-center">
-            <img id="sistema-img" src="${s.imagenUrl || '/css/images/dungeons_system.jpg'}" alt="${s.nombre}" class="mb-3 rounded" style="max-width:350px;max-height:220px;">
+            <img id="sistema-img" src="${s.imagenUrl || '/dungeons_system.jpg'}" alt="${s.nombre}" class="mb-3 rounded" style="max-width:350px;max-height:220px;">
           </div>
           <h2 class="text-center" id="sistema-nombre">${s.nombre}</h2>
           <button id="btn-follow" class="btn btn-outline-primary btn-sm btn-follow">+ Seguir</button>
@@ -467,7 +467,82 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         let editMode = false;
-        let backup = {};
+
+    
+        let docs = (s.documentos || []).map(d => ({...d}));
+
+        window.eliminarDocumentoLocal = function(idx) {
+          if (docs[idx].id) {
+            if (!confirm("¿Seguro que quieres eliminar este documento?")) return;
+            fetch(`/api/documentos/${docs[idx].id}`, { method: 'DELETE' })
+              .then(res => {
+                if (res.ok) {
+                  docs.splice(idx, 1);
+                  renderDocsForm();
+                } else {
+                  alert("Error al eliminar el documento.");
+                }
+              });
+          } else {
+            docs.splice(idx, 1);
+            renderDocsForm();
+          }
+        };
+
+        function renderDocsForm() {
+          const docsDiv = document.getElementById('documentos-list');
+          docsDiv.innerHTML = docs.map((d, i) => `
+            <div class="row g-2 align-items-center mb-2" data-doc-index="${i}">
+              <div class="col-4">
+                <input type="text" class="form-control" placeholder="Título" value="${d.titulo || ''}" disabled>
+              </div>
+              <div class="col-5">
+                <input type="text" class="form-control" placeholder="URL" value="${d.url || ''}" disabled>
+              </div>
+              <div class="col-2">
+                <input type="text" class="form-control" placeholder="Tipo" value="${d.tipo || ''}" disabled>
+              </div>
+              <div class="col-1">
+                <button class="btn btn-danger btn-sm" title="Eliminar" onclick="eliminarDocumentoLocal(${i})">✖</button>
+              </div>
+            </div>
+          `).join('') + `
+            <button id="btn-add-doc" class="btn btn-outline-primary btn-sm mt-2">Añadir documento</button>
+            <div id="nuevo-doc-form" class="mt-2"></div>
+          `;
+
+          setTimeout(() => {
+            document.getElementById('btn-add-doc').onclick = function() {
+              document.getElementById('nuevo-doc-form').innerHTML = `
+                <div class="row g-2 align-items-center mb-2">
+                  <div class="col-4">
+                    <input type="text" id="nuevo-doc-titulo" class="form-control" placeholder="Título">
+                  </div>
+                  <div class="col-5">
+                    <input type="text" id="nuevo-doc-url" class="form-control" placeholder="URL">
+                  </div>
+                  <div class="col-2">
+                    <input type="text" id="nuevo-doc-tipo" class="form-control" placeholder="Tipo">
+                  </div>
+                  <div class="col-1">
+                    <button id="btn-aceptar-nuevo-doc" class="btn btn-success btn-sm">Aceptar</button>
+                  </div>
+                </div>
+              `;
+              document.getElementById('btn-aceptar-nuevo-doc').onclick = function() {
+                const titulo = document.getElementById('nuevo-doc-titulo').value.trim();
+                const url = document.getElementById('nuevo-doc-url').value.trim();
+                const tipo = document.getElementById('nuevo-doc-tipo').value.trim();
+                if (!titulo || !url || !tipo) {
+                  alert("Rellena todos los campos.");
+                  return;
+                }
+                docs.push({ titulo, url, tipo }); 
+                renderDocsForm();
+              };
+            };
+          }, 0);
+        }
 
         btnEditar.onclick = function() {
           editMode = true;
@@ -475,34 +550,22 @@ document.addEventListener("DOMContentLoaded", function() {
           btnAceptar.classList.remove('d-none');
           btnCancelar.classList.remove('d-none');
 
-          // Backup valores originales
-          backup = {
-            imagenUrl: document.getElementById('sistema-img').src,
-            fechaUltima: document.getElementById('sistema-fecha-ultima').textContent,
-            descripcion: document.getElementById('sistema-descripcion').textContent,
-            documentos: Array.from(document.querySelectorAll('#documentos-list .documento-item')).map(div => ({
-              titulo: div.querySelector('.doc-titulo').textContent,
-              url: div.querySelector('a').href,
-              tipo: div.querySelector('.doc-tipo').textContent
-            }))
-          };
-
-          // Imagen (inline editable con lápiz)
+          
           const img = document.getElementById('sistema-img');
           img.outerHTML = `
             <div class="position-relative d-inline-block mb-2" style="max-width:350px;">
               <img id="edit-imagen-preview" src="${s.imagenUrl || '/css/images/dungeons_system.jpg'}" alt="${s.nombre}" class="mb-3 rounded" style="max-width:350px;max-height:220px;">
-              <span id="edit-imagen-pencil" title="Cambiar imagen" style="position:absolute;bottom:10px;right:10px;cursor:pointer;font-size:2rem;z-index:2;">🖉</span>
+              <span id="edit-imagen-pencil" title="Cambiar imagen" class="position-absolute bg-light rounded-circle p-1"
+                style="bottom:10px;right:10px;cursor:pointer;font-size:1.7em;z-index:2;box-shadow:0 0 4px #000;">✏️</span>
               <input type="file" id="edit-imagen-file" accept="image/*" style="display:none">
             </div>
           `;
 
-          // Lógica para el lápiz y la previsualización
           setTimeout(() => {
             const pencil = document.getElementById('edit-imagen-pencil');
             const fileInput = document.getElementById('edit-imagen-file');
             const preview = document.getElementById('edit-imagen-preview');
-            let nuevaImagenBase64 = null;
+            let nuevaImagenFile = null;
 
             pencil.onclick = () => fileInput.click();
 
@@ -512,74 +575,80 @@ document.addEventListener("DOMContentLoaded", function() {
                 const reader = new FileReader();
                 reader.onload = function(e) {
                   preview.src = e.target.result;
-                  nuevaImagenBase64 = e.target.result; // Guardamos la imagen en base64 para enviar al backend
                 };
                 reader.readAsDataURL(file);
+                nuevaImagenFile = file;
               }
             };
 
-            // Guardar la referencia para usarla en btnAceptar.onclick
-            btnAceptar.nuevaImagenBase64 = () => nuevaImagenBase64;
+            btnAceptar.nuevaImagenFile = () => nuevaImagenFile;
           }, 0);
 
-          // Fecha última publicación
+          
           const fechaUltima = document.getElementById('sistema-fecha-ultima');
           const fechaValue = s.fechaUltimaActualizacion ? new Date(s.fechaUltimaActualizacion).toISOString().slice(0,10) : '';
           fechaUltima.outerHTML = `<input type="date" id="edit-fecha-ultima" class="form-control d-inline-block" style="width:180px" value="${fechaValue}">`;
-
-          // Descripción
           const desc = document.getElementById('sistema-descripcion');
           desc.outerHTML = `<textarea id="edit-descripcion" class="form-control mb-2" rows="3">${s.descripcion || ''}</textarea>`;
-
-          // Documentos
-          const docsDiv = document.getElementById('documentos-list');
-          docsDiv.innerHTML = `
-            <textarea id="edit-documentos" class="form-control" rows="3">${
-              (s.documentos || []).map(d => `${d.titulo}|${d.url}|${d.tipo}`).join('\n')
-            }</textarea>
-            <small class="text-muted">Uno por línea, formato: título|url|tipo</small>
-          `;
+          renderDocsForm();
+          btnAceptar.getDocs = () => docs;
         };
 
         btnCancelar.onclick = function() {
-          // Restaurar vista original
           location.reload();
         };
 
         btnAceptar.onclick = function() {
-          // Recoger valores editados
-          let imagenUrl = s.imagenUrl;
-          const nuevaImagenBase64 = btnAceptar.nuevaImagenBase64 && btnAceptar.nuevaImagenBase64();
-          if (nuevaImagenBase64) {
-            imagenUrl = nuevaImagenBase64; // Enviar base64 al backend
-          }
+          const file = btnAceptar.nuevaImagenFile && btnAceptar.nuevaImagenFile();
           const fechaUltima = document.getElementById('edit-fecha-ultima').value;
           const descripcion = document.getElementById('edit-descripcion').value.trim();
-          const docs = document.getElementById('edit-documentos').value.trim()
-            ? document.getElementById('edit-documentos').value.trim().split('\n').map(line => {
-                const [titulo, url, tipo] = line.split('|');
-                return { titulo: titulo?.trim(), url: url?.trim(), tipo: tipo?.trim() };
-              })
-            : [];
+          const docs = btnAceptar.getDocs ? btnAceptar.getDocs() : [];
 
-          const actualizado = {
-            imagenUrl,
-            fechaUltimaActualizacion: fechaUltima ? new Date(fechaUltima).toISOString() : null,
-            descripcion,
-            documentos: docs
-          };
+          const nuevosDocs = docs.filter(d => !d.id);
 
-          fetch(`/api/sistemas-juego/admin/sistemas/${s.id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ...s, ...actualizado })
-          })
-          .then(res => {
-            if (res.ok) {
-              location.reload();
-            } else {
-              alert("Error al actualizar el sistema.");
-            }
+          function crearNuevosDocs(callback) {
+            if (!nuevosDocs.length) return callback();
+            let creados = 0;
+            nuevosDocs.forEach(doc => {
+              fetch('/api/documentos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                  titulo: doc.titulo,
+                  urlInfo: doc.url,
+                  tipo: doc.tipo,
+                  sistema: { id: s.id }
+                })
+              }).then(res => {
+                creados++;
+                if (creados === nuevosDocs.length) callback();
+              });
+            });
+          }
+
+          crearNuevosDocs(() => {
+            const formData = new FormData();
+            formData.append("sistema", new Blob([JSON.stringify({
+              id: s.id,
+              nombre: s.nombre,
+              descripcion,
+              imagenUrl: s.imagenUrl,
+              fechaPrimeraPublicacion: s.fechaPrimeraPublicacion,
+              fechaUltimaActualizacion: fechaUltima ? new Date(fechaUltima).toISOString().slice(0,10) : null
+            })], {type: "application/json"}));
+            if (file) formData.append("imagen", file);
+
+            fetch(`/api/sistemas-juego/admin/sistemas/${s.id}/con-imagen`, {
+              method: "PUT",
+              body: formData
+            })
+            .then(res => {
+              if (res.ok) {
+                location.reload();
+              } else {
+                alert("Error al actualizar el sistema.");
+              }
+            });
           });
         };
       })

@@ -402,7 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
       inner.innerHTML = sistemas.map((s, idx) => `
         <div class="carousel-item${idx === 0 ? ' active' : ''}">
           <a href="/sistema_detail?sistemaId=${s.id}" class="sistema-card text-decoration-none text-dark">
-            <img src="${s.imagenUrl || '/css/images/dungeons_system.jpg'}" class="d-block w-100" alt="${s.nombre}">
+            <img src="${s.imagenUrl || '/dungeons_system.jpg'}" class="d-block w-100" alt="${s.nombre}">
             <div class="carousel-caption d-none d-md-block">
               <h5>${s.nombre}</h5>
               <p>${s.descripcion}</p>
