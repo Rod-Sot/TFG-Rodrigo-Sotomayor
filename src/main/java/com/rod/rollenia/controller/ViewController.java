@@ -1,4 +1,4 @@
-package com.rod.rollenia;
+package com.rod.rollenia.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
