@@ -7,23 +7,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.rod.rollenia.service.NoticiaService;
+import com.rod.rollenia.service.NoticiaVotoService;
 
 @RestController
 public class NoticiaVotoController {
     
     @Autowired
-    private NoticiaService noticiaService;
+    private NoticiaVotoService noticiaVotoService;
 
     @PostMapping("/{id}/like")
     public ResponseEntity<?> likeNoticia(@PathVariable Long id, @RequestParam Long usuarioId) {
-        noticiaService.votarNoticia(id, usuarioId, true);
+        noticiaVotoService.votarNoticia(id, usuarioId, true);
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/dislike")
     public ResponseEntity<?> dislikeNoticia(@PathVariable Long id, @RequestParam Long usuarioId) {
-        noticiaService.votarNoticia(id, usuarioId, false);
+        noticiaVotoService.votarNoticia(id, usuarioId, false);
         return ResponseEntity.ok().build();
     }
 }

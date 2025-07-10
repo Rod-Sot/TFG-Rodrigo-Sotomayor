@@ -344,7 +344,7 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .then(noticia => {
         document.getElementById("noticia-detalle").innerHTML = `
-          <img src="img/noticia1.jpg" class="news-image" alt="Imagen noticia">
+          
           <div class="news-title" id="titulo">${noticia.titulo}</div>
           <div class="news-meta">
             Publicado el <span id="fechaPublicacion">${formatearFechaConMesMayus(noticia.fechaPublicacion)}</span>

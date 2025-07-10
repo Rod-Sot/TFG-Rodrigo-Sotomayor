@@ -28,12 +28,6 @@ public class SistemaJuegoController {
         this.usuarioService = usuarioService;
     }
 
-    @PostMapping
-    public ResponseEntity<SistemaJuego> crearSistemaJuego(@RequestBody SistemaJuego sistemaJuego) {
-        SistemaJuego nuevoSistema = sistemaJuegoService.crearSistemaJuego(sistemaJuego);
-        return new ResponseEntity<>(nuevoSistema, HttpStatus.CREATED);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<SistemaJuego> obtenerSistemaJuegoPorId(@PathVariable Long id) {
         Optional<SistemaJuego> sistemaJuego = sistemaJuegoService.obtenerSistemaJuegoPorId(id);
@@ -46,25 +40,6 @@ public class SistemaJuegoController {
         return sistemaJuegoService.listarSistemasJuego();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SistemaJuego> actualizarSistemaJuego(@PathVariable Long id, @RequestBody SistemaJuego sistemaJuegoActualizado) {
-        try {
-            SistemaJuego sistemaJuego = sistemaJuegoService.actualizarSistemaJuego(id, sistemaJuegoActualizado);
-            return ResponseEntity.ok(sistemaJuego);
-        } catch (jakarta.persistence.EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminarSistemaJuego(@PathVariable Long id) {
-        try {
-            sistemaJuegoService.eliminarSistemaJuego(id);
-            return ResponseEntity.noContent().build();
-        } catch (jakarta.persistence.EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
     @PostMapping("/{id}/seguir")
     public ResponseEntity<?> seguirSistema(@PathVariable Long id, @RequestBody SeguirRequest request) {
         Optional<Usuario> usuarioOpt = usuarioService.obtenerUsuarioPorId(request.getUsuarioId());
